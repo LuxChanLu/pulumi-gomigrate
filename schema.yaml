@@ -59,6 +59,7 @@ language:
     generateResourceContainerTypes: true
     importBasePath: github.com/LuxChanLu/pulumi-gomigrate/sdk/go/gomigrate
   nodejs:
+    packageName: "@luxchanlu/pulumi-gomigrate"
     dependencies:
       "@pulumi/pulumi": "^3.45.0"
     devDependencies:
