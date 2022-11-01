@@ -1,4 +1,4 @@
-VERSION         := 1.0.0
+VERSION         := 1.0.1
 
 PACK            := gomigrate
 PROJECT         := github.com/LuxChanLu/pulumi-${PACK}

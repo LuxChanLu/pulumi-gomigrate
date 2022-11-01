@@ -12,7 +12,7 @@ import (
 )
 
 type Migration struct {
-	pulumi.ResourceState
+	pulumi.CustomResourceState
 
 	// Date of the migration
 	MigratedAt pulumi.StringOutput `pulumi:"migratedAt"`
@@ -28,6 +28,9 @@ func NewMigration(ctx *pulumi.Context,
 	if args.DatabaseURL == nil {
 		return nil, errors.New("invalid value for required argument 'DatabaseURL'")
 	}
+	if args.PrevVersion == nil {
+		return nil, errors.New("invalid value for required argument 'PrevVersion'")
+	}
 	if args.SourceURL == nil {
 		return nil, errors.New("invalid value for required argument 'SourceURL'")
 	}
@@ -40,17 +43,43 @@ func NewMigration(ctx *pulumi.Context,
 	if args.SourceURL != nil {
 		args.SourceURL = pulumi.ToSecret(args.SourceURL).(pulumi.StringOutput)
 	}
+	opts = pkgResourceDefaultOpts(opts)
 	var resource Migration
-	err := ctx.RegisterRemoteComponentResource("gomigrate:index:Migration", name, args, &resource, opts...)
+	err := ctx.RegisterResource("gomigrate:index:Migration", name, args, &resource, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return &resource, nil
 }
 
+// GetMigration gets an existing Migration resource's state with the given name, ID, and optional
+// state properties that are used to uniquely qualify the lookup (nil if not required).
+func GetMigration(ctx *pulumi.Context,
+	name string, id pulumi.IDInput, state *MigrationState, opts ...pulumi.ResourceOption) (*Migration, error) {
+	var resource Migration
+	err := ctx.ReadResource("gomigrate:index:Migration", name, id, state, &resource, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &resource, nil
+}
+
+// Input properties used for looking up and filtering Migration resources.
+type migrationState struct {
+}
+
+type MigrationState struct {
+}
+
+func (MigrationState) ElementType() reflect.Type {
+	return reflect.TypeOf((*migrationState)(nil)).Elem()
+}
+
 type migrationArgs struct {
 	// Database URL to run the migrations on
 	DatabaseURL string `pulumi:"databaseURL"`
+	// Previous version to migrate on undo
+	PrevVersion int `pulumi:"prevVersion"`
 	// Source URL for the migrations
 	SourceURL string `pulumi:"sourceURL"`
 	// Version to migrate
@@ -61,6 +90,8 @@ type migrationArgs struct {
 type MigrationArgs struct {
 	// Database URL to run the migrations on
 	DatabaseURL pulumi.StringInput
+	// Previous version to migrate on undo
+	PrevVersion pulumi.IntInput
 	// Source URL for the migrations
 	SourceURL pulumi.StringInput
 	// Version to migrate

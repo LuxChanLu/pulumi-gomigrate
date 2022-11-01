@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/pulumi/pulumi/master/pkg/codegen/schema/pulumi.json
 ---
 name: gomigrate
+pluginDownloadUrl: github://api.github.com/LuxChanLu
 
 resources:
   gomigrate:index:Migrations:
@@ -19,7 +20,6 @@ resources:
       - databaseURL
 
   gomigrate:index:Migration:
-    isComponent: true
     inputProperties:
       sourceURL:
         type: string
@@ -35,10 +35,15 @@ resources:
         type: integer
         description: Version to migrate
         replaceOnChanges: true
+      prevVersion:
+        type: integer
+        description: Previous version to migrate on undo
+        replaceOnChanges: true
     requiredInputs:
       - sourceURL
       - databaseURL
       - version
+      - prevVersion
     properties:
       migratedAt:
         type: string

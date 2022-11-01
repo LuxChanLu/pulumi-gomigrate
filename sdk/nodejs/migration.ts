@@ -4,7 +4,19 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "./utilities";
 
-export class Migration extends pulumi.ComponentResource {
+export class Migration extends pulumi.CustomResource {
+    /**
+     * Get an existing Migration resource's state with the given name, ID, and optional extra
+     * properties used to qualify the lookup.
+     *
+     * @param name The _unique_ name of the resulting resource.
+     * @param id The _unique_ provider ID of the resource to lookup.
+     * @param opts Optional settings to control the behavior of the CustomResource.
+     */
+    public static get(name: string, id: pulumi.Input<pulumi.ID>, opts?: pulumi.CustomResourceOptions): Migration {
+        return new Migration(name, undefined as any, { ...opts, id: id });
+    }
+
     /** @internal */
     public static readonly __pulumiType = 'gomigrate:index:Migration';
 
@@ -31,12 +43,15 @@ export class Migration extends pulumi.ComponentResource {
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args: MigrationArgs, opts?: pulumi.ComponentResourceOptions) {
+    constructor(name: string, args: MigrationArgs, opts?: pulumi.CustomResourceOptions) {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
             if ((!args || args.databaseURL === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'databaseURL'");
+            }
+            if ((!args || args.prevVersion === undefined) && !opts.urn) {
+                throw new Error("Missing required property 'prevVersion'");
             }
             if ((!args || args.sourceURL === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'sourceURL'");
@@ -45,6 +60,7 @@ export class Migration extends pulumi.ComponentResource {
                 throw new Error("Missing required property 'version'");
             }
             resourceInputs["databaseURL"] = args?.databaseURL ? pulumi.secret(args.databaseURL) : undefined;
+            resourceInputs["prevVersion"] = args ? args.prevVersion : undefined;
             resourceInputs["sourceURL"] = args?.sourceURL ? pulumi.secret(args.sourceURL) : undefined;
             resourceInputs["version"] = args ? args.version : undefined;
             resourceInputs["migratedAt"] = undefined /*out*/;
@@ -52,7 +68,7 @@ export class Migration extends pulumi.ComponentResource {
             resourceInputs["migratedAt"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
-        super(Migration.__pulumiType, name, resourceInputs, opts, true /*remote*/);
+        super(Migration.__pulumiType, name, resourceInputs, opts);
     }
 }
 
@@ -64,6 +80,10 @@ export interface MigrationArgs {
      * Database URL to run the migrations on
      */
     databaseURL: pulumi.Input<string>;
+    /**
+     * Previous version to migrate on undo
+     */
+    prevVersion: pulumi.Input<number>;
     /**
      * Source URL for the migrations
      */

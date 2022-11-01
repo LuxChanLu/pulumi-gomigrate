@@ -10,7 +10,7 @@ using Pulumi.Serialization;
 namespace Pulumi.Gomigrate
 {
     [GomigrateResourceType("gomigrate:index:Migration")]
-    public partial class Migration : Pulumi.ComponentResource
+    public partial class Migration : Pulumi.CustomResource
     {
         /// <summary>
         /// Date of the migration
@@ -26,21 +26,39 @@ namespace Pulumi.Gomigrate
         /// <param name="name">The unique name of the resource</param>
         /// <param name="args">The arguments used to populate this resource's properties</param>
         /// <param name="options">A bag of options that control this resource's behavior</param>
-        public Migration(string name, MigrationArgs args, ComponentResourceOptions? options = null)
-            : base("gomigrate:index:Migration", name, args ?? new MigrationArgs(), MakeResourceOptions(options, ""), remote: true)
+        public Migration(string name, MigrationArgs args, CustomResourceOptions? options = null)
+            : base("gomigrate:index:Migration", name, args ?? new MigrationArgs(), MakeResourceOptions(options, ""))
         {
         }
 
-        private static ComponentResourceOptions MakeResourceOptions(ComponentResourceOptions? options, Input<string>? id)
+        private Migration(string name, Input<string> id, CustomResourceOptions? options = null)
+            : base("gomigrate:index:Migration", name, null, MakeResourceOptions(options, id))
         {
-            var defaultOptions = new ComponentResourceOptions
+        }
+
+        private static CustomResourceOptions MakeResourceOptions(CustomResourceOptions? options, Input<string>? id)
+        {
+            var defaultOptions = new CustomResourceOptions
             {
                 Version = Utilities.Version,
+                PluginDownloadURL = "github://api.github.com/LuxChanLu",
             };
-            var merged = ComponentResourceOptions.Merge(defaultOptions, options);
+            var merged = CustomResourceOptions.Merge(defaultOptions, options);
             // Override the ID if one was specified for consistency with other language SDKs.
             merged.Id = id ?? merged.Id;
             return merged;
+        }
+        /// <summary>
+        /// Get an existing Migration resource's state with the given name, ID, and optional extra
+        /// properties used to qualify the lookup.
+        /// </summary>
+        ///
+        /// <param name="name">The unique name of the resulting resource.</param>
+        /// <param name="id">The unique provider ID of the resource to lookup.</param>
+        /// <param name="options">A bag of options that control this resource's behavior</param>
+        public static Migration Get(string name, Input<string> id, CustomResourceOptions? options = null)
+        {
+            return new Migration(name, id, options);
         }
     }
 
@@ -61,6 +79,12 @@ namespace Pulumi.Gomigrate
                 _databaseURL = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
             }
         }
+
+        /// <summary>
+        /// Previous version to migrate on undo
+        /// </summary>
+        [Input("prevVersion", required: true)]
+        public Input<int> PrevVersion { get; set; } = null!;
 
         [Input("sourceURL", required: true)]
         private Input<string>? _sourceURL;

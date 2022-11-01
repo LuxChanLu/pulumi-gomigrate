@@ -96,6 +96,8 @@ func (p *gomigrateProvider) Check(ctx context.Context, req *pulumirpc.CheckReque
 
 // Diff checks what impacts a hypothetical update will have on the resource's properties.
 func (p *gomigrateProvider) Diff(ctx context.Context, req *pulumirpc.DiffRequest) (*pulumirpc.DiffResponse, error) {
+	urn := resource.URN(req.GetUrn())
+
 	olds, err := plugin.UnmarshalProperties(req.GetOlds(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
 	if err != nil {
 		return nil, err
@@ -106,16 +108,23 @@ func (p *gomigrateProvider) Diff(ctx context.Context, req *pulumirpc.DiffRequest
 		return nil, err
 	}
 
-	d := olds.Diff(news)
+	replaces := []string{}
+	deleteBeforeReplace := false
+
+	diff := olds.Diff(news)
 	changes := pulumirpc.DiffResponse_DIFF_NONE
 
-	if d.AnyChanges() {
-		changes = pulumirpc.DiffResponse_DIFF_SOME
+	switch urn.Type() {
+	case "gomigrate:index:Migration":
+		replaces, deleteBeforeReplace = p.diffMigration(ctx, diff)
+	default:
+		return nil, status.Error(codes.Unimplemented, fmt.Sprintf("%s does not exist", urn.Type()))
 	}
 
 	return &pulumirpc.DiffResponse{
-		Changes:  changes,
-		Replaces: []string{},
+		Changes:             changes,
+		Replaces:            replaces,
+		DeleteBeforeReplace: deleteBeforeReplace,
 	}, nil
 }
 
@@ -175,11 +184,16 @@ func (p *gomigrateProvider) Read(ctx context.Context, req *pulumirpc.ReadRequest
 	urn := resource.URN(req.GetUrn())
 	id := ""
 
+	inputs, err := plugin.UnmarshalProperties(req.GetProperties(), plugin.MarshalOptions{KeepUnknowns: true, SkipNulls: true})
+	if err != nil {
+		return nil, err
+	}
+
 	outputs := map[string]interface{}{}
 
 	switch urn.Type() {
 	case "gomigrate:index:Migration":
-		outputs["migratedAt"] = req.Properties.GetFields()["migratedAt"]
+		outputs["migratedAt"] = inputs["migratedAt"]
 	default:
 		return nil, status.Error(codes.Unimplemented, fmt.Sprintf("%s does not exist", urn.Type()))
 	}

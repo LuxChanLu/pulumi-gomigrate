@@ -3,6 +3,7 @@ module github.com/LuxChanLu/pulumi-gomigrate
 go 1.18
 
 require (
+	github.com/LuxChanLu/pulumi-gomigrate/sdk v0.0.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/golang/protobuf v1.5.2
@@ -12,6 +13,8 @@ require (
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
 )
+
+replace github.com/LuxChanLu/pulumi-gomigrate/sdk => ../sdk
 
 require (
 	cloud.google.com/go v0.104.0 // indirect

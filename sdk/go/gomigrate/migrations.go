@@ -34,6 +34,7 @@ func NewMigrations(ctx *pulumi.Context,
 	if args.SourceURL != nil {
 		args.SourceURL = pulumi.ToSecret(args.SourceURL).(pulumi.StringOutput)
 	}
+	opts = pkgResourceDefaultOpts(opts)
 	var resource Migrations
 	err := ctx.RegisterRemoteComponentResource("gomigrate:index:Migrations", name, args, &resource, opts...)
 	if err != nil {
