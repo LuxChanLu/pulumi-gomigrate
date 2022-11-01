@@ -35,7 +35,6 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/snowflake"
 	_ "github.com/golang-migrate/migrate/v4/database/spanner"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlcipher"
-	_ "github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlserver"
 	_ "github.com/golang-migrate/migrate/v4/database/stub"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
