@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/pulumi/pulumi/master/pkg/codegen/schema/pulumi.json
+---
+name: gomigrate
+
+resources:
+  gomigrate:index:Migrations:
+    isComponent: true
+    inputProperties:
+      sourceURL:
+        type: string
+        description: Source URL for the migrations
+        secret: true
+      databaseURL:
+        type: string
+        description: Database URL to run the migrations on
+        secret: true
+    requiredInputs:
+      - sourceURL
+      - databaseURL
+
+  gomigrate:index:Migration:
+    isComponent: true
+    inputProperties:
+      sourceURL:
+        type: string
+        description: Source URL for the migrations
+        replaceOnChanges: true
+        secret: true
+      databaseURL:
+        type: string
+        description: Database URL to run the migrations on
+        replaceOnChanges: true
+        secret: true
+      version:
+        type: integer
+        description: Version to migrate
+        replaceOnChanges: true
+    requiredInputs:
+      - sourceURL
+      - databaseURL
+      - version
+    properties:
+      migratedAt:
+        type: string
+        description: Date of the migration
+    required:
+      - migratedAt
+
+language:
+  csharp:
+    packageReferences:
+      Pulumi: 3.*
+  go:
+    generateResourceContainerTypes: true
+    importBasePath: github.com/LuxChanLu/pulumi-gomigrate/sdk/go/gomigrate
+  nodejs:
+    dependencies:
+      "@pulumi/pulumi": "^3.45.0"
+    devDependencies:
+      typescript: "^3.7.0"
+  python:
+    requires:
+      pulumi: ">=3.0.0,<4.0.0"
